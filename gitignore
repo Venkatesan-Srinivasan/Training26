@@ -16,3 +16,4 @@
 *.vcxproj.user
 *.csproj.user
 **/launchSettings.json
+.vs/
