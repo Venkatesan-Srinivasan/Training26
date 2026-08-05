@@ -53,7 +53,7 @@ class Program {
       }
       #endregion
       // Method to calculate score
-      #region Method ------------------------------------------------
+      #region Implementation ----------------------------------------
       int Score (string s) {
          if (s.Length == 4)
             return 1;
