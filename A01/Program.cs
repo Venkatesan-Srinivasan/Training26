@@ -10,9 +10,10 @@
 //  - You guessed correctly.
 // --------------------------------------------------------------------------------------------
 namespace A01;
+
 #region class Program -----------------------------------------------------------------------------
 class Program {
-   static void Main (string[] args) {
+   static void Main () {
       int randomNumber = new Random ().Next (1, 101);
       // To prompt the user to guess the Random number
       int guessNumber = GetNumber ("Enter a number from 1 to 100: ");
@@ -29,12 +30,14 @@ class Program {
             break;
          } else Console.WriteLine ($"The game is over and the number is {randomNumber}");
       }
+
       #region Implemenetation ---------------------------------------
       // Function to get a valid number from 1 to 100
       int GetNumber (string str) {
          for (; ; ) {
             Console.Write (str);
-            if (int.TryParse (Console.ReadLine (), out int result) && (result <= 100 && result > 0)) return result;
+            if (int.TryParse (Console.ReadLine (), out int result)
+               && (result <= 100 && result > 0)) return result;
             else Console.WriteLine ($"INVALID!");
          }
       }
