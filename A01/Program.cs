@@ -25,7 +25,7 @@ class Program {
             Console.WriteLine ("Your guess is too low");
          else if (guessNumber > randomNumber)
             Console.WriteLine ("Your guess is too high");
-         else{
+         else {
             Console.WriteLine ("You guessed correctly");
             break;
          }
