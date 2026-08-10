@@ -29,6 +29,8 @@ class Program {
             Console.WriteLine ("You guessed correctly");
             break;
          }
+         if (triesLeft == 1)
+            Console.WriteLine ($"The game is over and the number is {randomNumber}");
       }
 
       #region Implemenetation ---------------------------------------
@@ -38,7 +40,8 @@ class Program {
             Console.Write (str);
             if (int.TryParse (Console.ReadLine (), out int result)
                && (result <= 100 && result > 0)) return result;
-            else Console.WriteLine ($"INVALID! Enter a number from 1 to 100");
+            else Console.WriteLine ($"INVALID! " +
+                                    $"Enter a number from 1 to 100");
          }
       }
       #endregion
