@@ -15,29 +15,28 @@ class Program {
       int max = 127;
       Console.WriteLine ("Guess a number from 1 to 100 \nAnswer [Y]es or [N]o for the following");
       SecretCheck (min, max);
-      //Method to guess the secret number at 7 attempts
 
       #region Implementation ----------------------------------------
-      void SecretCheck (int l_min, int l_max) {
-         int l_mid = 0; ;
+      // Method to guess the secret number at 7 attempts
+      void SecretCheck (int min, int max) {
          for (int i = 7; i > 0; i--) {
-            l_mid = (l_min + l_max + 1) / 2;
-            Console.Write ($"\tIs the number less than {l_mid}: ");
+            int mid = (min + max + 1) / 2;
+            Console.Write ($"\tIs the number less than {mid}: ");
             var option = Console.ReadKey (true).Key;
             if (option == ConsoleKey.Y) {
                Console.WriteLine ("Yes");
-               l_max = l_mid;
+               max = mid;
             }
             if (option == ConsoleKey.N) {
                Console.WriteLine ("No");
-               l_min = l_mid;
+               min = mid;
             }
             if (option != ConsoleKey.Y && option != ConsoleKey.N) {
                Console.WriteLine ("Invalid! Press [Y]es or [N]o ");
                i++;
             }
          }
-         Console.WriteLine ($"\n\t{l_min} is your guess number");
+         Console.WriteLine ($"\n\t{min} is your guess number");
       }
       #endregion
    }
