@@ -1,29 +1,31 @@
-﻿// --------------------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------------------------
 // Training ~ A training program for new joinees at Metamation, Batch - July 2026.
 // Copyright (c) Metamation India.
 // ------------------------------------------------------------------------
 // Program.cs
 // Program to help solve a New-York Times style Spelling Bee.
-// The program can assume a word list is given as a text file, and that the daily choice of 7 letters is provided as an array of 7 chars:
+// The program can assume a word list is given as a text file, and that the daily choice of
+// 7 letters is provided as an array of 7 chars:
 // { 'U', 'X', 'A', 'L', 'T', 'N', 'E' }.
-// --------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 namespace A03;
+
 #region class Program -----------------------------------------------------------------------------
 class Program {
-   static void Main (string[] args) {
+   static void Main () {
       // Reading a file
-      string[] words = File.ReadAllLines ("C:/Users/srinivasanve/Downloads/words.txt");
-      // Adding words that contains "U" to the list.
-      List<string> validStrings = new List<string> ();
-      List<string> deleteStrings = new List<string> ();
-      // Each word must contain a letter "U"
+      string[] words = File.ReadAllLines ("../../../Data/words.txt");
+      char[] seedList = { 'U', 'X', 'A', 'L', 'T', 'N', 'E' };
+      List<string> validStrings = [];
+      List<string> deleteStrings = [];
+      // Each word must contain the first letter in seed list, if so add to the list.
       foreach (string i in words)
-         if (i.Contains ("U") && i.Length > 3)
+         if (i.Contains (seedList[0]) && i.Length > 3)
             validStrings.Add (i);
-      // Adding the invalid words that contain other than seven letters
+      // Adding the invalid words that contain other than seven letters in seed list.
+      // Ensures string s contains only characters from seedList.
       foreach (string s in validStrings)
-         foreach (char c in s)
-            if (c == 'U' || c == 'X' || c == 'A' || c == 'L' || c == 'T' || c == 'N' || c == 'E')
+            if (s.All (seedList.Contains))
                continue;
             else
                deleteStrings.Add (s);
@@ -40,20 +42,14 @@ class Program {
          total += Score (s);
       }
       Console.WriteLine ($"----\n{total} total");
+
+      #region Implementation ----------------------------------------
       // Method for finding whether the word is a pangram
-      #region Implementation ----------------------------------------
+      // Ensures string s contains all characters in seedList.
       bool IsPangram (string s) {
-         return s.Contains ('U')
-             && s.Contains ('X')
-             && s.Contains ('A')
-             && s.Contains ('L')
-             && s.Contains ('T')
-             && s.Contains ('N')
-             && s.Contains ('E');
+         return seedList.All (s.Contains);
       }
-      #endregion
       // Method to calculate score
-      #region Implementation ----------------------------------------
       int Score (string s) {
          if (s.Length == 4)
             return 1;
