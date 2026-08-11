@@ -25,16 +25,16 @@ class Program {
       // Adding the invalid words that contain other than seven letters in seed list.
       // Ensures string s contains only characters from seedList.
       foreach (string s in validStrings)
-            if (s.All (seedList.Contains))
-               continue;
-            else
-               deleteStrings.Add (s);
+         if (s.All (seedList.Contains))
+            continue;
+         else
+            deleteStrings.Add (s);
       // Deleting InValid words
       foreach (string st in deleteStrings)
          validStrings.Remove (st);
       // Console Layout
       int total = 0;
-      foreach (string s in validStrings.OrderByDescending (s => Score (s))) {
+      foreach (string s in validStrings.OrderByDescending (Score)) {
          if (IsPangram (s))
             Console.ForegroundColor = ConsoleColor.Green;
          Console.WriteLine ($"{Score (s),3}. {s}");
@@ -43,20 +43,14 @@ class Program {
       }
       Console.WriteLine ($"----\n{total} total");
 
-      #region Implementation ----------------------------------------
+      #region Implementations ----------------------------------------
       // Method for finding whether the word is a pangram
       // Ensures string s contains all characters in seedList.
-      bool IsPangram (string s) {
-         return seedList.All (s.Contains);
-      }
+      bool IsPangram (string s) => seedList.All (s.Contains);
+
       // Method to calculate score
-      int Score (string s) {
-         if (s.Length == 4)
-            return 1;
-         if (IsPangram (s))
-            return s.Length + 7;
-         return s.Length;
-      }
+      int Score (string s) =>
+         (s.Length == 4 ? 1 : s.Length) + (IsPangram (s) ? 7 : 0);
       #endregion
    }
 }
