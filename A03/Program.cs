@@ -15,17 +15,17 @@ class Program {
    static void Main () {
       // Reading a file
       string[] words = File.ReadAllLines ("../../../Data/words.txt");
-      char[] seedList = { 'U', 'X', 'A', 'L', 'T', 'N', 'E' };
+
       List<string> validStrings = [];
       List<string> deleteStrings = [];
       // Each word must contain the first letter in seed list, if so add to the list.
       foreach (string i in words)
-         if (i.Contains (seedList[0]) && i.Length > 3)
+         if (i.Contains (sSeedList[0]) && i.Length > 3)
             validStrings.Add (i);
       // Adding the invalid words that contain other than seven letters in seed list.
       // Ensures string s contains only characters from seedList.
       foreach (string s in validStrings)
-         if (s.All (seedList.Contains))
+         if (s.All (sSeedList.Contains))
             continue;
          else
             deleteStrings.Add (s);
@@ -42,16 +42,20 @@ class Program {
          total += Score (s);
       }
       Console.WriteLine ($"----\n{total} total");
-
-      #region Implementations ----------------------------------------
-      // Method for finding whether the word is a pangram
-      // Ensures string s contains all characters in seedList.
-      bool IsPangram (string s) => seedList.All (s.Contains);
-
-      // Method to calculate score
-      int Score (string s) =>
-         (s.Length == 4 ? 1 : s.Length) + (IsPangram (s) ? 7 : 0);
-      #endregion
    }
+
+   #region Implementations ------------------------------------------
+   // Method for finding whether the word is a pangram
+   // Ensures string s contains all characters in seedList.
+   static bool IsPangram (string s) => sSeedList.All (s.Contains);
+
+   // Method to calculate score
+   static int Score (string s) =>
+      (s.Length == 4 ? 1 : s.Length) + (IsPangram (s) ? 7 : 0);
+   #endregion
+
+   #region Private --------------------------------------------------
+   static char[] sSeedList = { 'U', 'X', 'A', 'L', 'T', 'N', 'E' };
+   #endregion
 }
 #endregion
