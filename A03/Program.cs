@@ -14,7 +14,7 @@ namespace A03;
 class Program {
    static void Main () {
       // Reading a file
-      string[] words = File.ReadAllLines ("../../../Data/words.txt");
+      string[] words = File.ReadAllLines ("../../../../Data/words.txt");
       // Console Layout
       int total = 0;
       foreach (var item in words.Where (IsValid).Select (s => new { Word = s, Points = Score (s) })
