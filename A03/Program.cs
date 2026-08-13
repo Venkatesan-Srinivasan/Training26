@@ -17,12 +17,13 @@ class Program {
       string[] words = File.ReadAllLines ("../../../Data/words.txt");
       // Console Layout
       int total = 0;
-      foreach (string s in words.Where (IsValid).OrderByDescending (Score)) {
-         if (IsPangram (s))
+      foreach (var item in words.Where (IsValid).Select (s => new { Word = s, Points = Score (s) })
+         .OrderByDescending (x => x.Points)) {
+         if (IsPangram (item.Word))
             Console.ForegroundColor = ConsoleColor.Green;
-         Console.WriteLine ($"{Score (s),3}. {s}");
+         Console.WriteLine ($"{item.Points,3}. {item.Word}");
          Console.ResetColor ();
-         total += Score (s);
+         total += item.Points;
       }
       Console.WriteLine ($"----\n{total} total");
    }
