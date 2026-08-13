@@ -15,26 +15,9 @@ class Program {
    static void Main () {
       // Reading a file
       string[] words = File.ReadAllLines ("../../../Data/words.txt");
-
-      List<string> validStrings = [];
-      List<string> deleteStrings = [];
-      // Each word must contain the first letter in seed list, if so add to the list.
-      foreach (string i in words)
-         if (i.Contains (sSeedList[0]) && i.Length > 3)
-            validStrings.Add (i);
-      // Adding the invalid words that contain other than seven letters in seed list.
-      // Ensures string s contains only characters from seedList.
-      foreach (string s in validStrings)
-         if (s.All (sSeedList.Contains))
-            continue;
-         else
-            deleteStrings.Add (s);
-      // Deleting InValid words
-      foreach (string st in deleteStrings)
-         validStrings.Remove (st);
       // Console Layout
       int total = 0;
-      foreach (string s in validStrings.OrderByDescending (Score)) {
+      foreach (string s in words.Where (IsValid).OrderByDescending (Score)) {
          if (IsPangram (s))
             Console.ForegroundColor = ConsoleColor.Green;
          Console.WriteLine ($"{Score (s),3}. {s}");
@@ -45,6 +28,12 @@ class Program {
    }
 
    #region Implementations ------------------------------------------
+   // Method for Valid Strings
+   // Each word contains 4 letters, first letter in seedlist,
+   // uses only 7 letters.
+   static bool IsValid (string s) => s.Length >= 4 &&
+      s.Contains (sSeedList[0]) && s.All (sSeedList.Contains);
+
    // Method for finding whether the word is a pangram
    // Ensures string s contains all characters in seedList.
    static bool IsPangram (string s) => sSeedList.All (s.Contains);
