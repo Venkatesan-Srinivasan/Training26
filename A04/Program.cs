@@ -2,27 +2,25 @@
 // Training ~ A training program for new joinees at Metamation, Batch - July 2026.
 // Copyright (c) Metamation India.
 // ------------------------------------------------------------------------
-// Program to build a frequency table with occurrence of all the letters in descending order.
-// To display the first 7 letters to be used as the seed letters from word list.
+// Program.cs
+// A04: Program to build a frequency table with occurrence of all the letters in descending order.
+// To display the first 7 letters with the count to be used as the seed letters from word list.
 // ------------------------------------------------------------------------------------------------
 namespace A04;
 
 #region class Program -----------------------------------------------------------------------------
 class Program {
    static void Main () {
-      // Initialize a dictionary => keys: upper case alphabets, values: 0
-      Dictionary<char, int> frequencyTable = new ();
-      for (char c = 'A'; c <= 'Z'; c++)
-         frequencyTable[c] = 0;
-      // Transforms lower case alphabets to uppercase and counts each character and update values
+      Dictionary<char, int> frequencyTable = [];
+      // Checks each character is alphabets & transforms lower case alphabets to uppercase
       foreach (var ch in File.ReadAllText ("../../../../Data/words.txt")
-               .Select (a => char.ToUpper (a)))
-         if (frequencyTable.ContainsKey (ch))
-            frequencyTable[ch]++;
-      // To display first 7 letters uses as a seed list for spelling bee.
-      Console.Write ("The SeedList is: ");
+               .Where (char.IsLetter).Select (char.ToUpper))
+         frequencyTable[ch] = (frequencyTable.TryGetValue (ch, out int count)) ? count + 1 : 1;
+
+      // To display first 7 letters and its occurrences.
+      Console.Write ("Letter | Occurrence");
       foreach (var item in frequencyTable.OrderByDescending (a => a.Value).Take (7))
-         Console.Write (item.Key);
+         Console.Write ($"\n{item.Key,3}{'|',5}{item.Value,8}");
    }
 }
 #endregion
