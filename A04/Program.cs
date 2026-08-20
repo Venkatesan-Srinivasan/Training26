@@ -15,8 +15,7 @@ class Program {
       // Checks each character is alphabets & transforms lower case alphabets to uppercase
       foreach (var ch in File.ReadAllText ("../../../../Data/words.txt")
                .Where (char.IsLetter).Select (char.ToUpper))
-         frequencyTable[ch] = (frequencyTable.TryGetValue (ch, out int count)) ? count + 1 : 1;
-
+         frequencyTable[ch] = frequencyTable.TryGetValue (ch, out int count) ? count + 1 : 1;
       // To display first 7 letters and its occurrences.
       Console.Write ("Letter | Occurrence");
       foreach (var item in frequencyTable.OrderByDescending (a => a.Value).Take (7))
