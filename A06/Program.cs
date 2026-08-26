@@ -23,8 +23,8 @@ class Program {
       EliminateIdenticalSlns (solutions);
       int count = 1;
       foreach (var solution in solutions) {
-         WriteLine ($"\n{count++}");
-         ChessBoard (sNum, solution);
+         WriteLine ($"\n{count++} of {solutions.Count}");
+         PrintChessBoard (sNum, solution);
       }
    }
 
@@ -38,14 +38,14 @@ class Program {
          };
          // Rotations and its vertical mirror
          int[] rot90 = Rotate90 (sln);
-         int[] flipRot90 = rot90.Reverse ().ToArray ();
+         int[] vFlipRot90 = rot90.Reverse ().ToArray ();
          int[] rot180 = Rotate90 (rot90);
-         int[] flipRot180 = rot180.Reverse ().ToArray ();
+         int[] vFlipRot180 = rot180.Reverse ().ToArray ();
          int[] rot270 = Rotate90 (rot180);
-         int[] flipRot270 = rot270.Reverse ().ToArray ();
-         symmetries.AddRange (new[] { rot90, rot180, rot270, flipRot90, flipRot180, flipRot270 });
-         bool isDuplicate = unique.Any (u => symmetries.Any (sym => u.SequenceEqual (sym)));
-         if (!isDuplicate)
+         int[] vFlipRot270 = rot270.Reverse ().ToArray ();
+         symmetries.AddRange ([rot90, rot180, rot270, vFlipRot90, vFlipRot180, vFlipRot270]);
+         bool IsDuplicate = unique.Any (u => symmetries.Any (sym => u.SequenceEqual (sym)));
+         if (!IsDuplicate)
             unique.Add (sln);
       }
       solutions.Clear ();
@@ -61,16 +61,16 @@ class Program {
    }
 
    // Prints each row to form a standard chessboard
-   static void ChessBoard (int n, int[] solution) {
+   static void PrintChessBoard (int n, int[] solution) {
       OutputEncoding = Encoding.UTF8;
       for (int row = 1; row <= 2 * n + 1; row++) {
          if (row == 1) // First line
-            WriteLine ($"┌───{PrintPattern ("┬───", n - 1)}┐");
+            WriteLine ($"┌───{GetPattern ("┬───", n - 1)}┐");
          // Middle lines which are odd lines and not last line
          else if (row % 2 != 0 && row != 2 * n + 1)
-            WriteLine ($"├───{PrintPattern ("┼───", n - 1)}┤");
+            WriteLine ($"├───{GetPattern ("┼───", n - 1)}┤");
          else if (row == 2 * n + 1) // Last line
-            WriteLine ($"└───{PrintPattern ("┴───", n - 1)}┘");
+            WriteLine ($"└───{GetPattern ("┴───", n - 1)}┘");
          // Queens line
          else {
             for (int col = 1; col <= n; col++) {
@@ -82,7 +82,7 @@ class Program {
       }
 
       // Print the given pattern for n times
-      string PrintPattern (string pattern, int n) {
+      string GetPattern (string pattern, int n) {
          string str = "";
          for (int i = 0; i < n; i++) str += pattern;
          return str;
@@ -96,19 +96,16 @@ class Program {
 
       // Recursive backtracking method to place queens row by row on the board
       void Place (int[] board, int r, int n, List<int[]> solutions) {
-         // Base case: if all rows are filled (r == n), we found a valid solution
-         if (r == n) {
-            solutions.Add ([.. board]);
-            return;
-         }
          // Choices: one queen per column in each row
          for (int col = 0; col < n; col++) {
             if (IsSafe (board, r, col)) {
                board[r] = col;
+               // Base case: if all rows are filled (r == n), we found a valid solution
+               if (r + 1 == n)
+                  solutions.Add ([.. board]);
                Place (board, r + 1, n, solutions); // Backtrack: Remove last placed queen
             }
          }
-         return;
       }
 
       // No two queen can share column and diagonal
