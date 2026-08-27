@@ -19,12 +19,12 @@ namespace A06;
 class Program {
    static void Main () {
       List<int[]> solutions = [];
-      Solve (sNum, solutions);
+      Solve (solutions);
       EliminateIdenticalSlns (solutions);
       int count = 1;
-      foreach (var solution in solutions) {
+      foreach (var sln in solutions) {
          WriteLine ($"\n{count++} of {solutions.Count}");
-         PrintChessBoard (sNum, solution);
+         PrintChessBoard (sln);
       }
    }
 
@@ -58,19 +58,19 @@ class Program {
    }
 
    // Prints each row to form a standard chessboard
-   static void PrintChessBoard (int n, int[] solution) {
+   static void PrintChessBoard (int[] solution) {
       OutputEncoding = Encoding.UTF8;
-      for (int row = 0; row < 2 * n + 1; row++) {
+      for (int row = 0, len = 2 * sNum + 1; row < len; row++) {
          if (row == 0) // First line
-            WriteLine ($"┌───{GetPattern ("┬───", n - 1)}┐");
+            WriteLine ($"┌───{GetPattern ("┬───")}┐");
          // Middle lines which are even lines and not last line
-         else if (row % 2 == 0 && row != 2 * n)
-            WriteLine ($"├───{GetPattern ("┼───", n - 1)}┤");
-         else if (row == 2 * n) // Last line
-            WriteLine ($"└───{GetPattern ("┴───", n - 1)}┘");
+         else if (row % 2 == 0 && row != 2 * sNum)
+            WriteLine ($"├───{GetPattern ("┼───")}┤");
+         else if (row == 2 * sNum) // Last line
+            WriteLine ($"└───{GetPattern ("┴───")}┘");
          // Queens line- odd lines [1,3,5,7..[/2 makes to access the array [0,1,2,3,..] of solution
          else {
-            for (int col = 0; col < n; col++) {
+            for (int col = 0; col < sNum; col++) {
                string res = (col == solution[row / 2]) ? "│ ♕ " : "│   ";
                Write (res);
             }
@@ -79,35 +79,35 @@ class Program {
       }
 
       // Print the given pattern for n times
-      string GetPattern (string pattern, int n) {
+      string GetPattern (string pattern) {
          string str = "";
-         for (int i = 0; i < n; i++) str += pattern;
+         for (int i = 0; i < sNum - 1; i++) str += pattern;
          return str;
       }
    }
 
    //  Solves for identical solutions
-   static void Solve (int n, List<int[]> solutions) {
-      int[] board = new int[n];
-      Place (board, 0, n, solutions);
+   static void Solve (List<int[]> solutions) {
+      int[] solution = new int[sNum];
+      Place (solution, 0, solutions);
 
       // Recursive backtracking method to place queens row by row on the board
-      void Place (int[] board, int r, int n, List<int[]> solutions) {
+      void Place (int[] solution, int r, List<int[]> solutions) {
          // Choices: one queen per column in each row
-         for (int col = 0; col < n; col++) {
-            if (IsSafe (board, r, col)) {
-               board[r] = col;
-               Place (board, r + 1, n, solutions); // Backtrack: Remove last placed queen
+         for (int col = 0; col < sNum; col++) {
+            if (IsSafe (solution, r, col)) {
+               solution[r] = col;
+               Place (solution, r + 1, solutions); // Backtrack: Remove last placed queen
                // Base case: if all rows are filled (r == n), we found a valid solution
-               if (r + 1 == n) solutions.Add ([.. board]);
+               if (r + 1 == sNum) solutions.Add ([.. solution]);
             }
          }
       }
 
       // No two queen can share column and diagonal
-      bool IsSafe (int[] board, int row, int col) {
+      bool IsSafe (int[] solution, int row, int col) {
          for (int i = 0; i < row; i++) {
-            int c = board[i];
+            int c = solution[i];
             if (c == col || Math.Abs (c - col) == Math.Abs (i - row))
                return false;
          }
