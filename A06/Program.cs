@@ -37,12 +37,9 @@ class Program {
             ([.. sln.Reverse ()]) // Vertical mirror
          };
          // Rotations and its vertical mirror
-         int[] rot90 = Rotate90 (sln);
-         int[] vFlipRot90 = rot90.Reverse ().ToArray ();
-         int[] rot180 = Rotate90 (rot90);
-         int[] vFlipRot180 = rot180.Reverse ().ToArray ();
-         int[] rot270 = Rotate90 (rot180);
-         int[] vFlipRot270 = rot270.Reverse ().ToArray ();
+         int[] rot90 = Rotate90 (sln), vFlipRot90 = [.. rot90.Reverse ()],
+               rot180 = Rotate90 (rot90), vFlipRot180 = [.. rot180.Reverse ()],
+               rot270 = Rotate90 (rot180), vFlipRot270 = [.. rot270.Reverse ()];
          symmetries.AddRange ([rot90, rot180, rot270, vFlipRot90, vFlipRot180, vFlipRot270]);
          bool IsDuplicate = unique.Any (u => symmetries.Any (sym => u.SequenceEqual (sym)));
          if (!IsDuplicate)
@@ -63,18 +60,18 @@ class Program {
    // Prints each row to form a standard chessboard
    static void PrintChessBoard (int n, int[] solution) {
       OutputEncoding = Encoding.UTF8;
-      for (int row = 1; row <= 2 * n + 1; row++) {
-         if (row == 1) // First line
+      for (int row = 0; row < 2 * n + 1; row++) {
+         if (row == 0) // First line
             WriteLine ($"┌───{GetPattern ("┬───", n - 1)}┐");
-         // Middle lines which are odd lines and not last line
-         else if (row % 2 != 0 && row != 2 * n + 1)
+         // Middle lines which are even lines and not last line
+         else if (row % 2 == 0 && row != 2 * n)
             WriteLine ($"├───{GetPattern ("┼───", n - 1)}┤");
-         else if (row == 2 * n + 1) // Last line
+         else if (row == 2 * n) // Last line
             WriteLine ($"└───{GetPattern ("┴───", n - 1)}┘");
-         // Queens line
+         // Queens line- odd lines [1,3,5,7..[/2 makes to access the array [0,1,2,3,..] of solution
          else {
-            for (int col = 1; col <= n; col++) {
-               string res = (col == solution[row / 2 - 1] + 1) ? "│ ♕ " : "│   ";
+            for (int col = 0; col < n; col++) {
+               string res = (col == solution[row / 2]) ? "│ ♕ " : "│   ";
                Write (res);
             }
             Write ("│ \n");
@@ -100,10 +97,9 @@ class Program {
          for (int col = 0; col < n; col++) {
             if (IsSafe (board, r, col)) {
                board[r] = col;
-               // Base case: if all rows are filled (r == n), we found a valid solution
-               if (r + 1 == n)
-                  solutions.Add ([.. board]);
                Place (board, r + 1, n, solutions); // Backtrack: Remove last placed queen
+               // Base case: if all rows are filled (r == n), we found a valid solution
+               if (r + 1 == n) solutions.Add ([.. board]);
             }
          }
       }
