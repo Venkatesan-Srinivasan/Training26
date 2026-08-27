@@ -41,8 +41,8 @@ class Program {
                rot180 = Rotate90 (rot90), vFlipRot180 = [.. rot180.Reverse ()],
                rot270 = Rotate90 (rot180), vFlipRot270 = [.. rot270.Reverse ()];
          symmetries.AddRange ([rot90, rot180, rot270, vFlipRot90, vFlipRot180, vFlipRot270]);
-         bool IsDuplicate = unique.Any (u => symmetries.Any (sym => u.SequenceEqual (sym)));
-         if (!IsDuplicate)
+         bool isDuplicate = unique.Any (u => symmetries.Any (sym => u.SequenceEqual (sym)));
+         if (!isDuplicate)
             unique.Add (sln);
       }
       solutions.Clear ();
