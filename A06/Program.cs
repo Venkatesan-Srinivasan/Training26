@@ -20,7 +20,7 @@ class Program {
    static void Main () {
       List<int[]> solutions = [];
       Solve (solutions);
-      EliminateIdenticalSlns (solutions);
+      EliminateIdentical (solutions);
       int count = 1;
       foreach (var sln in solutions) {
          WriteLine ($"\n{count++} of {solutions.Count}");
@@ -30,7 +30,7 @@ class Program {
 
    #region Implementations ------------------------------------------
    // Solve for distinct solutions
-   static void EliminateIdenticalSlns (List<int[]> solutions) {
+   static void EliminateIdentical (List<int[]> solutions) {
       List<int[]> unique = [];
       foreach (var sln in solutions) {
          var symmetries = new List<int[]> {
