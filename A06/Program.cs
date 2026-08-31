@@ -41,37 +41,38 @@ class Program {
                rot180 = Rotate90 (rot90), vFlipRot180 = [.. rot180.Reverse ()],
                rot270 = Rotate90 (rot180), vFlipRot270 = [.. rot270.Reverse ()];
          symmetries.AddRange ([rot90, rot180, rot270, vFlipRot90, vFlipRot180, vFlipRot270]);
-         bool isDuplicate = unique.Any (u => symmetries.Any (sym => u.SequenceEqual (sym)));
-         if (!isDuplicate)
-            unique.Add (sln);
+         bool isDuplicate = unique.Any (u => symmetries.Any (a => u.SequenceEqual (a)));
+         if (isDuplicate)
+            continue;
+         unique.Add (sln);
       }
       solutions.Clear ();
       solutions.AddRange (unique);
 
       // Rotate by 90
       int[] Rotate90 (int[] arr) {
-         int[] rotated = new int[sNum];
-         for (int j = 0; j < sNum; j++)
-            rotated[arr[j]] = sNum - 1 - j;
+         int[] rotated = new int[N];
+         for (int i = 0; i < N; i++)
+            rotated[arr[i]] = N - 1 - i;
          return rotated;
       }
    }
 
    // Prints each row to form a standard chessboard
-   static void PrintChessBoard (int[] solution) {
+   static void PrintChessBoard (int[] sln) {
       OutputEncoding = Encoding.UTF8;
-      for (int row = 0, len = 2 * sNum + 1; row < len; row++) {
+      for (int row = 0, len = 2 * N + 1; row < len; row++) {
          if (row == 0) // First line
             WriteLine ($"┌───{GetPattern ("┬───")}┐");
          // Middle lines which are even lines and not last line
-         else if (row % 2 == 0 && row != 2 * sNum)
+         else if (row % 2 == 0 && row != 2 * N)
             WriteLine ($"├───{GetPattern ("┼───")}┤");
-         else if (row == 2 * sNum) // Last line
+         else if (row == 2 * N) // Last line
             WriteLine ($"└───{GetPattern ("┴───")}┘");
          // Queens line- odd lines [1,3,5,7..[/2 makes to access the array [0,1,2,3,..] of solution
          else {
-            for (int col = 0; col < sNum; col++) {
-               string res = (col == solution[row / 2]) ? "│ ♕ " : "│   ";
+            for (int col = 0; col < N; col++) {
+               string res = (col == sln[row / 2]) ? "│ ♕ " : "│   ";
                Write (res);
             }
             Write ("│ \n");
@@ -81,33 +82,33 @@ class Program {
       // Print the given pattern for n times
       string GetPattern (string pattern) {
          string str = "";
-         for (int i = 0; i < sNum - 1; i++) str += pattern;
+         for (int i = 0, len = N - 1; i < len; i++) str += pattern;
          return str;
       }
    }
 
    //  Solves for identical solutions
    static void Solve (List<int[]> solutions) {
-      int[] solution = new int[sNum];
-      Place (solution, 0, solutions);
+      int[] sln = new int[N];
+      Place (sln, 0, solutions);
 
       // Recursive backtracking method to place queens row by row on the board
-      void Place (int[] solution, int r, List<int[]> solutions) {
+      void Place (int[] sln, int r, List<int[]> solutions) {
          // Choices: one queen per column in each row
-         for (int col = 0; col < sNum; col++) {
-            if (IsSafe (solution, r, col)) {
-               solution[r] = col;
-               Place (solution, r + 1, solutions); // Backtrack: Remove last placed queen
+         for (int c = 0; c < N; c++) {
+            if (IsSafe (sln, r, c)) {
+               sln[r] = c;
+               Place (sln, r + 1, solutions); // Backtrack: Remove last placed queen
                // Base case: if all rows are filled (r == n), we found a valid solution
-               if (r + 1 == sNum) solutions.Add ([.. solution]);
+               if (r + 1 == N) solutions.Add ([.. sln]);
             }
          }
       }
 
       // No two queen can share column and diagonal
-      bool IsSafe (int[] solution, int row, int col) {
+      bool IsSafe (int[] sln, int row, int col) {
          for (int i = 0; i < row; i++) {
-            int c = solution[i];
+            int c = sln[i];
             if (c == col || Math.Abs (c - col) == Math.Abs (i - row))
                return false;
          }
@@ -117,7 +118,7 @@ class Program {
    #endregion
 
    #region Private --------------------------------------------------
-   static int sNum = 8;
+   const int N = 8; // Board size: 8X8
    #endregion
 }
 #endregion
