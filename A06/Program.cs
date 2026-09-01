@@ -16,17 +16,16 @@ class Program {
    static void Main () {
       List<int[]> solutions = [];
       Solve (solutions);
-      EliminateIdentical (solutions);
-      int count = 1;
-      foreach (var sln in solutions) {
-         WriteLine ($"\n{count++} of {solutions.Count}");
-         PrintChessBoard (sln);
+      GetUniqueSolutions (solutions);
+      for (int i = 0, count = solutions.Count (); i < count; i++) {
+         WriteLine ($"\n{i + 1} of {count}");
+         PrintChessBoard (solutions[i]);
       }
    }
 
    #region Implementations ------------------------------------------
    // Solve for distinct solutions
-   static void EliminateIdentical (List<int[]> solutions) {
+   static void GetUniqueSolutions (List<int[]> solutions) {
       List<int[]> unique = [];
       foreach (var sln in solutions) {
          var symmetries = new List<int[]> { ([.. sln.Reverse ()]) }; // Vertical mirror
@@ -42,10 +41,10 @@ class Program {
 
       // Rotate by 90
       int[] Rotate90 (int[] arr) {
-         int[] rotated = new int[N];
+         int[] arr2 = new int[N];
          for (int i = 0; i < N; i++)
-            rotated[arr[i]] = N - 1 - i;
-         return rotated;
+            arr2[arr[i]] = N - 1 - i;
+         return arr2;
       }
    }
 
@@ -61,7 +60,7 @@ class Program {
                string res = (col == sln[row / 2]) ? "│ ♕ " : "│   ";
                Write (res);
             }
-            Write ("│ \n");
+            WriteLine ("│");
          }
       }
 
@@ -81,7 +80,7 @@ class Program {
       // Recursive backtracking method to place queens row by row on the board
       void Place (int[] sln, int r, List<int[]> solutions) {
          for (int c = 0; c < N; c++) { // Choices: one queen per column in each row
-            if (IsSafe (sln, r, c)) {
+            if (IsValid (sln, r, c)) {
                sln[r] = c;
                Place (sln, r + 1, solutions); // Backtrack: Remove last placed queen
                if (r + 1 == N) solutions.Add ([.. sln]); // Base case: r == n --> valid solution
@@ -90,7 +89,7 @@ class Program {
       }
 
       // No two queen can share column and diagonal
-      bool IsSafe (int[] sln, int row, int col) {
+      bool IsValid (int[] sln, int row, int col) {
          for (int i = 0; i < row; i++) {
             int c = sln[i];
             if (c == col || Math.Abs (c - col) == Math.Abs (i - row)) return false;
