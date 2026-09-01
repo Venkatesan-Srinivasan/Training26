@@ -41,7 +41,7 @@ class Program {
 
       // Rotate by 90
       int[] Rotate90 (int[] arr) {
-         int[] arr2 = new int[N];
+         int[] arr2 = new int[arr.Length];
          for (int i = 0; i < N; i++)
             arr2[arr[i]] = N - 1 - i;
          return arr2;
@@ -64,7 +64,7 @@ class Program {
          }
       }
 
-      // Print the given pattern for n times
+      // Returns the given pattern for n times
       string GetPattern (string pattern) {
          string str = "";
          for (int i = 0, len = N - 1; i < len; i++) str += pattern;
