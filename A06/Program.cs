@@ -42,7 +42,7 @@ class Program {
       // Rotate by 90
       int[] Rotate90 (int[] arr) {
          int[] arr2 = new int[arr.Length];
-         for (int i = 0; i < N; i++)
+         for (int i = 0; i < arr.Length; i++)
             arr2[arr[i]] = N - 1 - i;
          return arr2;
       }
@@ -82,7 +82,7 @@ class Program {
          for (int c = 0; c < N; c++) { // Choices: one queen per column in each row
             if (IsValid (sln, r, c)) {
                sln[r] = c;
-               Place (sln, r + 1, solutions); // Backtrack: Remove last placed queen
+               Place (sln, r + 1, solutions); // Backtrack: Relocates last placed queen
                if (r + 1 == N) solutions.Add ([.. sln]); // Base case: r == n --> valid solution
             }
          }
