@@ -40,10 +40,11 @@ class Program {
       solutions.AddRange (unique);
 
       // Rotate by 90
-      int[] Rotate90 (int[] arr) {
-         int[] arr2 = new int[arr.Length];
-         for (int i = 0; i < arr.Length; i++)
-            arr2[arr[i]] = N - 1 - i;
+      static int[] Rotate90 (int[] arr) {
+         int len = arr.Length;
+         int[] arr2 = new int[len];
+         for (int i = 0; i < len; i++)
+            arr2[arr[i]] = len - 1 - i;
          return arr2;
       }
    }
@@ -65,7 +66,7 @@ class Program {
       }
 
       // Returns the given pattern for n times
-      string GetPattern (string pattern) {
+      static string GetPattern (string pattern) {
          string str = "";
          for (int i = 0, len = N - 1; i < len; i++) str += pattern;
          return str;
