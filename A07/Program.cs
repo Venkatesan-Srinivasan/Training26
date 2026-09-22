@@ -56,9 +56,8 @@ class Program {
    // Converts a numeric string into a double value.
    static double ConvertToDouble (string str) {
       if (string.IsNullOrWhiteSpace (str)) return double.NaN;
-      str = str.Trim ();
       double? specialValue = str.ToLowerInvariant () switch {
-         "NaN" => double.NaN,
+         "nan" => double.NaN,
          "infinity" => double.PositiveInfinity,
          "+infinity" => double.PositiveInfinity,
          "-infinity" => double.NegativeInfinity,
@@ -67,17 +66,15 @@ class Program {
       if (specialValue.HasValue) return specialValue.Value;
       string[] parts = str.Split ('e', 'E');
       if (parts.Length > MAXPARTS) return double.NaN;
-      if (parts.Length == 1) return GetMantissa (parts[0]);
-      else if (parts.Length == MAXPARTS) {
-         return GetMantissa (parts[0]) * GetExponent (parts[1]);
-      } else return double.NaN;
+      double mantissa = GetMantissa (parts[0]);
+      return (parts.Length == 1) ? mantissa : mantissa * GetExponent (parts[1]);
    }
 
    // Parses the mantissa (integer and fractional part).
    static double GetMantissa (string str) {
       if (string.IsNullOrEmpty (str)) return double.NaN;
       var (sign, unsignedStr) = ExtractSign (str);
-  //    if (!unsignedStr.Any (char.IsDigit)) return double.NaN;
+      if (!unsignedStr.Any (char.IsDigit)) return double.NaN;
       string[] parts = unsignedStr.Split ('.');
       if (parts.Length > MAXPARTS) return double.NaN;
       string integerStr = parts[0];
@@ -105,10 +102,8 @@ class Program {
    static double GetDigits (string str) {
       if (string.IsNullOrEmpty (str)) return double.NaN;
       double digits = 0;
-      for (int i = 0; i < str.Length; i++) {
-         if (char.IsDigit (str[i])) digits = (digits * 10) + (str[i] - '0');
-         else return double.NaN;
-      }
+      for (int i = 0; i < str.Length; i++)
+         digits = (char.IsDigit (str[i])) ? (digits * 10) + (str[i] - '0') : double.NaN;
       return digits;
    }
 
