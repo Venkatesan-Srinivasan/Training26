@@ -17,66 +17,116 @@ namespace A07;
 #region class Program -----------------------------------------------------------------------------
 class Program {
    static void Main () {
-      var testCases = new List<string>{"0", "123", "-456", "+789","67.88902", "-45.67", "+5.123",
-         ".5", "5.", ".0001", "1.", ".1",".0", "1e3", "1E3", "1.23e3", "4.56E-2", "-7.89e+2",
-         "+3.2e-5", "NaN", "Infinity", "-Infinity", "  123.45   ", "000123.4500", "6.7.78",
-         "45e-98", "9e999", "-0.0000001", "+0.0",};
+      var testCases = new List<string>
+      {
+         // Basic numbers
+         "0", "123", "-456", "+789",
+          // Decimal formats
+          "67.88902", "-45.67", ".5", "5.", "000123.4500",
+          // Scientific notation
+          "1e3", "1E-3", "-7.89e+2", ".5e2", "5.e2",
+          // Very large / small values
+          "1e300", "9e999", "1e-300", "1e-999",
+          // Precision
+          "0.1234567890123456789", "123456789.123456789", "999999999999999",
+          // Invalid decimal / exponent / signs
+          "1.2.3", "1e2e3", "e10", "1e", "1e+", "1e++2", "1e+-2", "++1", "+-1", "1+2",
+          // No actual number
+          "", " ", "+", "-", ".", "-.", "abc", "12abc", "1.2f",
+          // Special double values
+          "NaN", "Infinity", "-Infinity", "+Infinity",
+          // Whitespace
+          "   123.45   ", "12 34"
+      };
       foreach (string str in testCases.Select (s => s.Trim ())) {
          double value = ConvertToDouble (str);
-         Console.WriteLine ($"{str,15} ---> {value,15:G10}");
+         double parsed;
+         try {
+            parsed = double.Parse (str);
+         } catch (FormatException) {
+            parsed = double.NaN;
+         }
+         if (!value.Equals (parsed)) Console.ForegroundColor = ConsoleColor.Red;
+         Console.WriteLine ($"{str,25} ---> {value,25:G17} | {parsed:G17}");
+         Console.ResetColor ();
       }
    }
 
    #region Implementations ------------------------------------------------------------------------
-   static double ConvertToDouble (string str) { // Converts a numeric string into a double value.
+   // Converts a numeric string into a double value.
+   static double ConvertToDouble (string str) {
       if (string.IsNullOrWhiteSpace (str)) return double.NaN;
+      str = str.Trim ();
+      double? specialValue = str.ToLowerInvariant () switch {
+         "NaN" => double.NaN,
+         "infinity" => double.PositiveInfinity,
+         "+infinity" => double.PositiveInfinity,
+         "-infinity" => double.NegativeInfinity,
+         _ => null
+      };
+      if (specialValue.HasValue) return specialValue.Value;
       string[] parts = str.Split ('e', 'E');
-      if (parts.Length > MaxParts) return double.NaN;
+      if (parts.Length > MAXPARTS) return double.NaN;
       if (parts.Length == 1) return GetMantissa (parts[0]);
-      else if (parts.Length == MaxParts) {
+      else if (parts.Length == MAXPARTS) {
          return GetMantissa (parts[0]) * GetExponent (parts[1]);
       } else return double.NaN;
    }
 
-   static double GetMantissa (string str) { // Parses the mantissa (integer and fractional part).
+   // Parses the mantissa (integer and fractional part).
+   static double GetMantissa (string str) {
       if (string.IsNullOrEmpty (str)) return double.NaN;
-      int sign = 1;
-      if (str[0] == '+' || str[0] == '-') {
-         if (str[0] == '-') sign = -1;
-         str = str.Substring (1);
-      }
-      string[] parts = str.Split ('.');
-      if (parts.Length > MaxParts) return double.NaN;
+      var (sign, unsignedStr) = ExtractSign (str);
+  //    if (!unsignedStr.Any (char.IsDigit)) return double.NaN;
+      string[] parts = unsignedStr.Split ('.');
+      if (parts.Length > MAXPARTS) return double.NaN;
+      string integerStr = parts[0];
       double integer = 0;
-      if (!string.IsNullOrEmpty (parts[0]))
-         integer = GetDigits (parts[0]);
+      if (!string.IsNullOrEmpty (integerStr))
+         integer = GetDigits (integerStr);
       if (parts.Length == 1) return sign * integer;
+      string fractionalStr = parts[1];
       double fractional = 0;
-      if (parts.Length == MaxParts && !string.IsNullOrEmpty (parts[1])) {
-         double decimals = GetDigits (parts[1]);
-         fractional = decimals * Math.Pow (10, -parts[1].Length);
+      if (parts.Length == MAXPARTS && !string.IsNullOrEmpty (fractionalStr)) {
+         double decimals = GetDigits (fractionalStr);
+         fractional = decimals * Math.Pow (10, -fractionalStr.Length);
       }
       return sign * (integer + fractional);
    }
 
    // Parses the exponent and returns 10 raised to that power.
-   static double GetExponent (string str) =>
-      string.IsNullOrEmpty (str) ? double.NaN : Math.Pow (10, GetDigits (str));
+   static double GetExponent (string str) {
+      if (string.IsNullOrEmpty (str)) return double.NaN;
+      var (sign, unsignedStr) = ExtractSign (str);
+      return Math.Pow (10, sign * GetDigits (unsignedStr));
+   }
 
-   static double GetDigits (string str) { // Parses a signed integer string into a numeric value.
+   // Parses a integer string into a numeric value.
+   static double GetDigits (string str) {
       if (string.IsNullOrEmpty (str)) return double.NaN;
       double digits = 0;
-      int startIndex = (str[0] == '+' || str[0] == '-') ? 1 : 0;
-      int sign = (startIndex == 1 && str[0] == '-') ? -1 : 1;
-      for (int i = startIndex; i < str.Length; i++) {
+      for (int i = 0; i < str.Length; i++) {
          if (char.IsDigit (str[i])) digits = (digits * 10) + (str[i] - '0');
          else return double.NaN;
       }
-      return sign * digits;
+      return digits;
+   }
+
+   // Extracts the leading sign and returns the remaining string.
+   static (int sign, string str) ExtractSign (string str) {
+      if (string.IsNullOrEmpty (str)) return (1, str);
+      int sign = 1;
+      char signChar = str[0];
+      if (signChar == '+' || signChar == '-') {
+         if (signChar == '-') sign = -1;
+         str = str[1..];
+      }
+      return (sign, str);
    }
    #endregion
+
    #region Private --------------------------------------------------------------------------------
-   const int MaxParts = 2; // At most two parts: before and after '.' or 'e'
+   const int MAXPARTS = 2; // At most two parts: before and after '.' or 'e'
    #endregion
 }
 #endregion
