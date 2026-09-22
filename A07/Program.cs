@@ -57,10 +57,7 @@ class Program {
    static double ConvertToDouble (string str) {
       if (string.IsNullOrWhiteSpace (str)) return double.NaN;
       double? specialValue = str.ToLowerInvariant () switch {
-         "nan" => double.NaN,
-         "infinity" => double.PositiveInfinity,
-         "+infinity" => double.PositiveInfinity,
-         "-infinity" => double.NegativeInfinity,
+         "nan" or "infinity" or "+infinity" or "-infinity" => double.NaN,
          _ => null
       };
       if (specialValue.HasValue) return specialValue.Value;
