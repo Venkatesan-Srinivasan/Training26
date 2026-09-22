@@ -99,8 +99,10 @@ class Program {
    static double GetDigits (string str) {
       if (string.IsNullOrEmpty (str)) return double.NaN;
       double digits = 0;
-      for (int i = 0; i < str.Length; i++)
-         digits = (char.IsDigit (str[i])) ? (digits * 10) + (str[i] - '0') : double.NaN;
+      for (int i = 0; i < str.Length; i++) {
+         if (char.IsDigit (str[i])) digits = (digits * 10) + (str[i] - '0');
+         else return double.NaN;
+      }
       return digits;
    }
 
