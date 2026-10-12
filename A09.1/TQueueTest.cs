@@ -5,103 +5,106 @@
 // TQueueTest.cs
 // Tests the TQueue<T> implementation.
 // ------------------------------------------------------------------------------------------------
-using System;
-
+using Xunit;
 namespace GenericQueue;
 
 #region class TQueueTest --------------------------------------------------------------------------
 /// <summary>Tests the TQueue class</summary>
-class TQueueTest {
-
+public class TQueueTest {
    #region Methods --------------------------------------------------
-   /// <summary>Test basic queue operations</summary>
-   public static void TestBasicQueue () {
-      TQueue<int> q = new ();
-      q.TEnqueue (10);
-      q.TEnqueue (20);
-      q.TEnqueue (30);
-      bool passed = q.TDequeue () == 10 &&
-                    q.TDequeue () == 20 &&
-                    q.TDequeue () == 30 &&
-                    q.TIsEmpty ();
-      PrintResult ("Basic Queue", passed);
-   }
-
    /// <summary>Test clearing the queue</summary>
-   public static void TestClear () {
+   [Fact]
+   public void ClearRemovesAllElements () {
       TQueue<int> q = new ();
-      q.TEnqueue (10);
-      q.TEnqueue (20);
-      q.TClear ();
-      bool passed = q.TCount () == 0 && q.TIsEmpty ();
-      PrintResult ("Clear", passed);
+      q.Enqueue (10);
+      q.Enqueue (20);
+      q.Clear ();
+      Assert.Equal (0, q.Count ());
+      Assert.True (q.IsEmpty ());
    }
 
    /// <summary>Test circular queue behavior</summary>
-   public static void TestCircularQueue () {
+   [Fact]
+   public void CircularQueueMaintainsCorrectOrder () {
       TQueue<int> q = new ();
-      q.TEnqueue (10);
-      q.TEnqueue (20);
-      q.TEnqueue (30);
-      q.TEnqueue (40);
-      q.TDequeue ();
-      q.TDequeue ();
-      q.TEnqueue (50);
-      q.TEnqueue (60);
-      bool passed = q.TDequeue () == 30 &&
-                    q.TDequeue () == 40 &&
-                    q.TDequeue () == 50 &&
-                    q.TDequeue () == 60 &&
-                    q.TIsEmpty ();
-      PrintResult ("Circular Queue", passed);
+      q.Enqueue (10);
+      q.Enqueue (20);
+      q.Enqueue (30);
+      q.Enqueue (40);
+      q.Dequeue ();
+      q.Dequeue ();
+      q.Enqueue (50);
+      q.Enqueue (60);
+      Assert.Equal (30, q.Dequeue ());
+      Assert.Equal (40, q.Dequeue ());
+      Assert.Equal (50, q.Dequeue ());
+      Assert.Equal (60, q.Dequeue ());
+      Assert.True (q.IsEmpty ());
    }
 
    /// <summary>Test operations on an empty queue</summary>
-   public static void TestEmptyQueue () {
+   [Fact]
+   public void DequeueThrowsOnEmptyQueue () {
       TQueue<int> q = new ();
-      bool dequeuePassed = false;
-      bool peekPassed = false;
-      try {
-         q.TDequeue ();
-      } catch (Exception e) {
-         dequeuePassed = e.Message == "Queue Empty";
-      }
-      try {
-         q.TPeek ();
-      } catch (Exception e) {
-         peekPassed = e.Message == "Queue Empty";
-      }
-      PrintResult ("Empty Queue", dequeuePassed && peekPassed);
+      InvalidOperationException ex =
+         Assert.Throws<InvalidOperationException> (() => q.Dequeue ());
+      Assert.Equal ("Queue Empty", ex.Message);
+   }
+
+   /// <summary>Test basic queue operations</summary>
+   [Fact]
+   public void EnqueueAndDequeueMaintainFifoOrder () {
+      TQueue<int> q = new ();
+      q.Enqueue (10);
+      q.Enqueue (20);
+      q.Enqueue (30);
+      Assert.Equal (10, q.Dequeue ());
+      Assert.Equal (20, q.Dequeue ());
+      Assert.Equal (30, q.Dequeue ());
+      Assert.True (q.IsEmpty ());
    }
 
    /// <summary>Test peek and count</summary>
-   public static void TestPeek () {
+   [Fact]
+   public void PeekReturnsFirstElement () {
       TQueue<int> q = new ();
-      q.TEnqueue (100);
-      q.TEnqueue (200);
-      bool passed = q.TPeek () == 100 &&
-                    q.TCount () == 2;
-      PrintResult ("Peek and Count", passed);
+      q.Enqueue (100);
+      q.Enqueue (200);
+      Assert.Equal (100, q.Peek ());
+      Assert.Equal (2, q.Count ());
+   }
+
+   /// <summary>Test operations on an empty peek</summary>
+   [Fact]
+   public void PeekThrowsOnEmptyQueue () {
+      TQueue<int> q = new ();
+      InvalidOperationException ex =
+         Assert.Throws<InvalidOperationException> (() => q.Peek ());
+      Assert.Equal ("Queue Empty", ex.Message);
+   }
+
+   /// <summary>Test reference type</summary>
+   [Fact]
+   public void QueueSupportsStringValues () {
+      TQueue<string> q = new ();
+      q.Enqueue ("John");
+      q.Enqueue ("Sam");
+      Assert.Equal ("John", q.Dequeue ());
+      Assert.Equal ("Sam", q.Dequeue ());
+      Assert.True (q.IsEmpty ());
    }
 
    /// <summary>Test automatic queue resizing</summary>
-   public static void TestResize () {
+   [Fact]
+   public void ResizeMaintainsQueueOrder () {
       TQueue<int> q = new ();
       for (int i = 1; i <= 10; i++)
-         q.TEnqueue (i);
-      bool passed = q.TCount () == 10;
+         q.Enqueue (i);
+      Assert.Equal (10, q.Count ());
       for (int i = 1; i <= 10; i++)
-         if (q.TDequeue () != i)
-            passed = false;
-      passed = passed && q.TIsEmpty ();
-      PrintResult ("Resize", passed);
+         Assert.Equal (i, q.Dequeue ());
+      Assert.True (q.IsEmpty ());
    }
-   #endregion
-
-   #region Implementation -------------------------------------------
-   /// <summary>Print the test result</summary>
-   static void PrintResult (string test, bool passed) =>
-      Console.WriteLine ($"{test}: {(passed ? "PASSED" : "FAILED")}");
    #endregion
 }
 #endregion

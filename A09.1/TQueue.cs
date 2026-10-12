@@ -4,33 +4,35 @@
 // ------------------------------------------------------------------------------------------------
 // TQueue.cs
 // A09.1: Implement a TQueue<T>
-// Implements a generic queue of T, using a circular arrayusing System;
+// Implements a generic queue of T, using a circular array
+using System;
 namespace GenericQueue;
 
 #region class TQueue ------------------------------------------------------------------------------
 /// <summary>Generic first-in-first-out queue implemented using a circular array</summary>
-class TQueue<T> {
+public class TQueue<T> {
    #region Methods --------------------------------------------------
    /// <summary>Clear the queue</summary>
-   public void TClear () {
+   public void Clear () {
       mQueue = new T[CAPACITY];
       mHead = mTail = mUsed = 0;
    }
 
    /// <summary>Get the number of items</summary>
-   public int TCount () => mUsed;
+   public int Count () => mUsed;
 
    /// <summary>Remove the first item</summary>
-   public T TDequeue () {
+   public T Dequeue () {
       CheckEmpty ();
       T value = mQueue[mHead];
+      mQueue[mHead] = default!;
       mHead = (mHead + 1) % mQueue.Length;
       mUsed--;
       return value;
    }
 
    /// <summary>Add an item to the queue</summary>
-   public void TEnqueue (T item) {
+   public void Enqueue (T item) {
       if (mUsed == mQueue.Length)
          Resize ();
       mQueue[mTail] = item;
@@ -39,10 +41,10 @@ class TQueue<T> {
    }
 
    /// <summary>Check if the queue is empty</summary>
-   public bool TIsEmpty () => mUsed == 0;
+   public bool IsEmpty () => mUsed == 0;
 
    /// <summary>Get the first item</summary>
-   public T TPeek () {
+   public T Peek () {
       CheckEmpty ();
       return mQueue[mHead];
    }
@@ -52,12 +54,12 @@ class TQueue<T> {
    /// <summary>Check if the queue is empty</summary>
    void CheckEmpty () {
       if (mUsed == 0)
-         throw new Exception ("Queue Empty");
+         throw new InvalidOperationException ("Queue Empty");
    }
 
    /// <summary>Increase the queue capacity when full</summary>
    void Resize () {
-      int newSize = mQueue.Length == 0 ? CAPACITY : 2 * mQueue.Length;
+      int newSize = 2 * mQueue.Length;
       T[] newQueue = new T[newSize];
       for (int i = 0; i < mUsed; i++)
          newQueue[i] = mQueue[(mHead + i) % mQueue.Length];
