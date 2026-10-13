@@ -14,12 +14,12 @@ public class TQueue<T> {
    #region Methods --------------------------------------------------
    /// <summary>Clear the queue</summary>
    public void Clear () {
-      mQueue = new T[CAPACITY];
+      Array.Clear (mQueue);
       mHead = mTail = mUsed = 0;
    }
 
    /// <summary>Get the number of items</summary>
-   public int Count () => mUsed;
+   public int Count => mUsed;
 
    /// <summary>Remove the first item</summary>
    public T Dequeue () {
@@ -41,7 +41,7 @@ public class TQueue<T> {
    }
 
    /// <summary>Check if the queue is empty</summary>
-   public bool IsEmpty () => mUsed == 0;
+   public bool IsEmpty => mUsed == 0;
 
    /// <summary>Get the first item</summary>
    public T Peek () {
@@ -59,8 +59,10 @@ public class TQueue<T> {
 
    /// <summary>Increase the queue capacity when full</summary>
    void Resize () {
-      int newSize = 2 * mQueue.Length;
-      T[] newQueue = new T[newSize];
+      T[] newQueue = new T[2 * mQueue.Length];
+      int firstPart = mQueue.Length - mHead;   // Called only when full, so mUsed == Length
+      Array.Copy (mQueue, mHead, newQueue, 0, firstPart);
+      Array.Copy (mQueue, 0, newQueue, firstPart, mHead);
       for (int i = 0; i < mUsed; i++)
          newQueue[i] = mQueue[(mHead + i) % mQueue.Length];
       mQueue = newQueue;
