@@ -106,6 +106,21 @@ public class TQueueTest {
          Assert.AreEqual (i, q.Dequeue ());
       Assert.IsTrue (q.IsEmpty);
    }
+
+   /// <summary>Test resizing while the head has wrapped around</summary>
+   [TestMethod]
+   public void ResizeWhileWrappedMaintainsQueueOrder () {
+      TQueue<int> q = new ();
+      for (int i = 1; i <= 4; i++)
+         q.Enqueue (i); // Fill initial capacity
+      q.Dequeue ();
+      q.Dequeue (); // mHead = 2
+      for (int i = 5; i <= 10; i++)
+         q.Enqueue (i); // Wraps, then resizes
+      for (int i = 3; i <= 10; i++)
+         Assert.AreEqual (i, q.Dequeue ());
+      Assert.IsTrue (q.IsEmpty);
+   }
    #endregion
 }
 #endregion
