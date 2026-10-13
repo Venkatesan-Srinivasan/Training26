@@ -63,8 +63,6 @@ public class TQueue<T> {
       int firstPart = mQueue.Length - mHead;   // Called only when full, so mUsed == Length
       Array.Copy (mQueue, mHead, newQueue, 0, firstPart);
       Array.Copy (mQueue, 0, newQueue, firstPart, mHead);
-      for (int i = 0; i < mUsed; i++)
-         newQueue[i] = mQueue[(mHead + i) % mQueue.Length];
       mQueue = newQueue;
       mHead = 0;
       mTail = mUsed;
