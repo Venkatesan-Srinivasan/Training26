@@ -62,8 +62,9 @@ public class TQueue<T> {
 
    /// <summary>Increase the queue capacity when full</summary>
    void Resize () {
-      T[] newQueue = new T[2 * mQueue.Length];
-      int firstPart = mQueue.Length - mHead;   // Called only when full, so Count == Length
+      int length = mQueue.Length;
+      T[] newQueue = new T[2 * length];
+      int firstPart = length - mHead;   // Called only when full, so Count == Length
       Array.Copy (mQueue, mHead, newQueue, 0, firstPart);
       Array.Copy (mQueue, 0, newQueue, firstPart, mHead);
       mQueue = newQueue;
