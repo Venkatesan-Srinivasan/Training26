@@ -11,15 +11,21 @@ namespace GenericQueue;
 #region class TQueue ------------------------------------------------------------------------------
 /// <summary>Generic first-in-first-out queue implemented using a circular array</summary>
 public class TQueue<T> {
+
+   #region Properties -----------------------------------------------
+   /// <summary>Get the number of items</summary>
+   public int Count => mUsed;
+
+   /// <summary>Check if the queue is empty</summary>
+   public bool IsEmpty => mUsed == 0;
+   #endregion
+
    #region Methods --------------------------------------------------
    /// <summary>Clear the queue</summary>
    public void Clear () {
       Array.Clear (mQueue);
       mHead = mTail = mUsed = 0;
    }
-
-   /// <summary>Get the number of items</summary>
-   public int Count => mUsed;
 
    /// <summary>Remove the first item</summary>
    public T Dequeue () {
@@ -39,9 +45,6 @@ public class TQueue<T> {
       mTail = (mTail + 1) % mQueue.Length;
       mUsed++;
    }
-
-   /// <summary>Check if the queue is empty</summary>
-   public bool IsEmpty => mUsed == 0;
 
    /// <summary>Get the first item</summary>
    public T Peek () {
