@@ -9,6 +9,11 @@ class EvalException : Exception {
    public EvalException (string message) : base (message) { }
 }
 class Evaluator {
+   #region Properties -----------------------------------------------
+   public int BasePriority { get; set; }
+   #endregion
+
+   #region Methods --------------------------------------------------
    public double Evaluate (string text) {
       Reset ();
       List<Token> tokens = []; //the number of tokens is  not known
@@ -20,35 +25,57 @@ class Evaluator {
          tokens.Add (token);
       }
       TVariable? tVariable = null;
-      if (tokens.Count > 2 && tokens[0] is TVariable tvar && tokens[1] is TOpArithmetic { Op: '=' }) {
+      if (tokens.Count > 2 && tokens[0] is TVariable tvar && tokens[1] is TOpBinary { Op: '=' }) {
+         tVariable = tvar;
+         tokens.RemoveRange (0, 2);
+      }
+      TUnary? tUnary = null;
+      if (tokens.Count > 1 && tokens[0] is TUnary tU && tokens[1] is TUnary { : '+' or '-' }) {
          tVariable = tvar;
          tokens.RemoveRange (0, 2);
       }
       foreach (var t in tokens) Process (t);
       while (mOperators.Count > 0) ApplyOperator ();
+      if (BasePriority != 0) throw new EvalException ("Mismatched parentheses");
+      if (mOperators.Count > 0) throw new EvalException ("Too many operators");
+      if (mOperands.Count > 1) throw new EvalException ("Too many operators");
       double f = mOperands.Pop ();
       if (tVariable != null) mVars[tVariable.Name] = f;
       return f;
    }
-   public int BasePriority { get; set; }
-   public void Reset () {
-      mOperators.Clear ();
-      mOperands.Clear ();
-      BasePriority = 0;
-   }
+
    public double GetVariable (string name) {
       if (mVars.TryGetValue (name, out double value)) return value;
       throw new EvalException ($"Unknown variable: {name}");
    }
-   readonly Dictionary<string, double> mVars = [];
+   #endregion
 
+   #region Implementations ------------------------------------------
+   void ApplyOperator () {
+      var op = mOperators.Pop ();
+      var f1 = mOperands.Pop ();
+      if (op is TOpFunction func) {
+         if (mOperands.Count < 1) throw new EvalException ("Too few operators");
+         mOperands.Push (func.Apply (f1));
+      } else if (op is TOpBinary bin) {
+         if (mOperands.Count < 1) throw new EvalException ("Too few operands");
+         var f2 = mOperands.Pop ();
+         mOperands.Push (bin.Apply (f2, f1));
+      }
+   }
+   bool OkToPush (TOperator op) {
+      if (mOperators.Count == 0) return true;
+      var top = mOperators.Peek ();
+      return op.FinalPriority > top.FinalPriority;
+   }
    void Process (Token token) {
       switch (token) {
          case TNumber num:
             mOperands.Push (num.Value);
             break;
          case TOperator op:
-            while (mOperators.Count > 0 && mOperators.Peek ().Priority > op.Priority) ApplyOperator ();
+            op.FinalPriority = op.Priority + BasePriority;
+            while (!OkToPush (op)) ApplyOperator ();
             mOperators.Push (op);
             break;
          case TPunctuation p:
@@ -57,69 +84,16 @@ class Evaluator {
          default: throw new EvalException ($"Unexpected token: {token}");
       }
    }
+   void Reset () {
+      mOperators.Clear ();
+      mOperands.Clear ();
+      BasePriority = 0;
+   }
+   #endregion
+
+   #region Private --------------------------------------------------
    readonly Stack<double> mOperands = [];
    readonly Stack<TOperator> mOperators = [];
-   void ApplyOperator () {
-      var op = mOperators.Pop ();
-      var f1 = mOperands.Pop ();
-      if (op is TOpFunction func) mOperands.Push (func.Evaluate (f1));
-      else if (op is TOpArithmetic arith) {
-         var f2 = mOperands.Pop ();
-         mOperands.Push (arith.Evaluate (f2, f1));
-      }
-   }
+   readonly Dictionary<string, double> mVars = [];
+   #endregion
 }
-class Tokenizer {
-   public Tokenizer (Evaluator eval, string text) {
-      mText = text;
-      mN = 0;
-      mEval = eval;
-
-      // Tokenization logic goes here
-   }
-   readonly Evaluator mEval;  // The evaluator that owns this
-   readonly string mText;     // The input text we're parsing through
-   int mN;
-
-   public Token Next () {
-      while (mN < mText.Length) {
-         char ch = char.ToLower (mText[mN++]);
-         switch (ch) {
-            case ' ' or '\t': continue;
-            case (>= '0' and <= '9') or '.': return GetNumber ();
-            case '(' or ')': return new TPunctuation (ch);
-            case '+' or '-' or '*' or '/' or '^' or '=': return new TOpArithmetic (mEval, ch);
-            case >= 'a' and <= 'z': return GetIdentifier ();
-            default: return new TError ($"Unknown symbol: {ch}");
-         }
-      }
-      return new TEnd ();
-   }
-
-   Token GetIdentifier () {
-      int start = mN - 1;
-      while (mN < mText.Length) {
-         char ch = char.ToLower (mText[mN++]);
-         if (ch is >= 'a' and <= 'z' or >= '0' and <= '9') continue;
-         mN--;
-         break;
-      }
-      string sub = mText[start..mN];
-      if (mFuncs.Contains (sub)) return new TOpFunction (mEval, sub);
-      else return new TVariable (mEval, sub);
-   }
-   readonly string[] mFuncs = { "sin", "cos", "tan", "asin", "acos", "atan", "log", "exp", "sqrt" };
-   Token GetNumber () {
-      int start = mN - 1;
-      while (mN < mText.Length) {
-         char ch = mText[mN++];
-         if (ch is (>= '0' and <= '9') or '.') continue;
-         mN--; break;
-      }
-      string sub = mText[start..mN];
-      if (double.TryParse (sub, out double number)) return new TLiteral (number);
-      return new TError ($"Invalid number:{sub}");
-   }
-
-}
-
