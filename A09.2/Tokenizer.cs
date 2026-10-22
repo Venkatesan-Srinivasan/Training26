@@ -1,27 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// ------------------------------------------------------------------------------------------------
+// Training ~ A training program for new joinees at Metamation, Batch - July 2026.
+// Copyright (c) Trumpf Metamation India.
+// ------------------------------------------------------------------------------------------------
+// Tokenizer.cs
+// A09.2: Expression Evaluator
+// Converts input text into tokens and identifies unary minus operators
+// ------------------------------------------------------------------------------------------------
+
 using Eval;
 
 class Tokenizer {
    #region Constructor ----------------------------------------------
    public Tokenizer (Evaluator eval, string text) {
-      mText = text;
-      mN = 0;
-      mEval = eval;
+      _evaluator = eval;
+      _position = 0;
+      _text = text;
    }
    #endregion
 
    #region Method ---------------------------------------------------
    public Token Next () {
-      while (mN < mText.Length) {
-         char ch = char.ToLower (mText[mN++]);
+      while (_position < _text.Length) {
+         char ch = char.ToLower (_text[_position++]);
          switch (ch) {
-            case ' ' or '\t': continue;
-            case (>= '0' and <= '9') or '.': return GetNumber ();
-            case '(' or ')': return new TPunctuation (ch);
-            case '+' or '-' or '*' or '/' or '^' or '=': return new TOpBinary (mEval, ch);
-            case >= 'a' and <= 'z': return GetIdentifier ();
+            case (>= '0' and <= '9') or '.': return Remember (GetNumber ());
+            case '(' or ')': return Remember (new TPunctuation (ch));
+            case '-': return GetMinus (ch);
+            case '+' or '*' or '/' or '^' or '=':
+               return Remember (new TOpBinary (_evaluator, ch.ToString ()));
+            case >= 'a' and <= 'z': return Remember (GetIdentifier ());
             default: return new TError ($"Unknown symbol: {ch}");
          }
       }
@@ -31,35 +38,50 @@ class Tokenizer {
 
    #region Implementations ------------------------------------------
    Token GetIdentifier () {
-      int start = mN - 1;
-      while (mN < mText.Length) {
-         char ch = char.ToLower (mText[mN++]);
-         if (ch is >= 'a' and <= 'z' or >= '0' and <= '9') continue;
-         mN--;
+      int start = _position - 1;
+      while (_position < _text.Length) {
+         char ch = char.ToLower (_text[_position++]);
+         if (ch is >= 'a' and <= 'z') continue;
+         _position--;
          break;
       }
-      string sub = mText[start..mN];
-      if (mFuncs.Contains (sub)) return new TOpFunction (mEval, sub);
-      else return new TVariable (mEval, sub);
+      string sub = _text[start.._position];
+      if (_functions.Contains (sub)) return new TOpFunction (_evaluator, sub);
+      else return new TVariable (_evaluator, sub);
+   }
+
+   Token GetMinus (char ch) {
+      Token token;
+      token = (IsUnaryContext ()) ?
+         new TUnary (_evaluator, ch.ToString ()) : new TOpBinary (_evaluator, ch.ToString ());
+      return Remember (token);
    }
 
    Token GetNumber () {
-      int start = mN - 1;
-      while (mN < mText.Length) {
-         char ch = mText[mN++];
+      int start = _position - 1;
+      while (_position < _text.Length) {
+         char ch = _text[_position++];
          if (ch is (>= '0' and <= '9') or '.') continue;
-         mN--; break;
+         _position--; break;
       }
-      string sub = mText[start..mN];
+      string sub = _text[start.._position];
       if (double.TryParse (sub, out double number)) return new TLiteral (number);
       return new TError ($"Invalid number:{sub}");
    }
+
+   bool IsUnaryContext () {
+      return _previousToken == null ||
+             _previousToken is TOperator ||
+             _previousToken is TPunctuation { Punct: '(' };
+   }
+   Token Remember (Token token) => _previousToken = token;
    #endregion
 
    #region Private --------------------------------------------------
-   readonly Evaluator mEval;
-   readonly string[] mFuncs = { "sin", "cos", "tan", "asin", "acos", "atan", "log", "exp", "sqrt" };
-   readonly string mText;
-   int mN;
+   readonly Evaluator _evaluator;
+   readonly string[] _functions = ["sin", "cos", "tan", "asin", "acos", "atan", "log", "exp", "sqrt"];
+   int _position;
+   Token? _previousToken;
+   readonly string _text;
    #endregion
 }

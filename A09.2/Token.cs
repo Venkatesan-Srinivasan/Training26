@@ -1,13 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// ------------------------------------------------------------------------------------------------
+// Training ~ A training program for new joinees at Metamation, Batch - July 2026.
+// Copyright (c) Trumpf Metamation India.
+// ------------------------------------------------------------------------------------------------
+// Token.cs
+// A09.2: Expression Evaluator
+// Token and operator class hierarchy for expression parsing and evaluation
+// ------------------------------------------------------------------------------------------------
 
 namespace Eval;
 
 abstract class Token { }
+
 abstract class TNumber : Token {
    public abstract double Value { get; }
 }
+
 class TLiteral : TNumber {
    public TLiteral (double f) => mValue = f;
    public override double Value => mValue;
@@ -22,6 +29,7 @@ class TVariable : TNumber {
    public override string ToString () => $"var:{Name}";
    readonly Evaluator mEval;
 }
+
 abstract class TOperator : Token {
    protected TOperator (Evaluator eval) => mEval = eval;
    public abstract int Priority { get; }
@@ -30,36 +38,28 @@ abstract class TOperator : Token {
 }
 
 class TOpBinary : TOperator {
-   public TOpBinary (Evaluator eval, char ch) : base (eval) => Op = ch;
-   public char Op { get; private set; }
+   public TOpBinary (Evaluator eval, string op) : base (eval) => Op = op;
+   public string Op { get; }
    public override string ToString () => $"op:{Op}:{Priority}";
-   public override int Priority => sPriority[Op] + mEval.BasePriority;
-   static Dictionary<char, int> sPriority = new () {
-      ['+'] = 1, ['-'] = 1, ['*'] = 2, ['/'] = 2, ['^'] = 3, ['='] = 4,
+   public override int Priority => sPriority[Op];
+   static readonly Dictionary<string, int> sPriority = new () {
+      ["+"] = 1, ["-"] = 1, ["*"] = 2, ["/"] = 2, ["^"] = 3, ["="] = 4
    };
-
    public double Apply (double a, double b) => Op switch {
-      '+' => a + b,
-      '-' => a - b,
-      '*' => a * b,
-      '/' => a / b,
-      '^' => Math.Pow (a, b),
+      "+" => a + b,
+      "-" => a - b,
+      "*" => a * b,
+      "/" => a / b,
+      "^" => Math.Pow (a, b),
       _ => throw new NotImplementedException ()
    };
 }
 
-class TUnary : TNumber {
-   public TUnary (Evaluator eval, string name) => (Name, mEval) = (name, eval);
-   public string Name { get; private set; }
-   public override double Value => mEval.TUnary (Name);
-   public override string ToString () => $"Unary:{Name}";
-   readonly Evaluator mEval;
-}
 class TOpFunction : TOperator {
    public TOpFunction (Evaluator eval, string name) : base (eval) => Func = name;
-   public string Func { get; private set; }
+   public string Func { get; }
    public override string ToString () => $"func:{Func}:{Priority}";
-   public override int Priority => 4 + mEval.BasePriority;
+   public override int Priority => 7;
 
    public double Apply (double f) => Func switch {
       "sin" => Math.Sin (D2R (f)),
@@ -76,9 +76,19 @@ class TOpFunction : TOperator {
    double D2R (double f) => f * Math.PI / 180;
    double R2D (double f) => f * 180 / Math.PI;
 }
+
+class TUnary : TOperator {
+   public TUnary (Evaluator eval, string un) : base (eval) => Operator = un;
+   public string Operator { get; }
+   public override int Priority => sPriority[Operator];
+   static readonly Dictionary<string, int> sPriority = new () { ["-"] = 6 };
+   public override string ToString () => $"unary:{Operator}";
+   public double Apply (double a) => (Operator == "-") ? -a : throw new NotImplementedException ();
+}
+
 class TPunctuation : Token {
    public TPunctuation (char ch) => Punct = ch;
-   public char Punct { get; private set; }
+   public char Punct { get; }
    public override string ToString () => $"punct:{Punct}";
 }
 
@@ -88,6 +98,6 @@ class TEnd : Token {
 
 class TError : Token {
    public TError (string message) => Message = message;
-   public string Message { get; private set; }
+   public string Message { get; }
    public override string ToString () => $"error:{Message}";
 }

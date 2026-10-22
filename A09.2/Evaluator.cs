@@ -1,13 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
+﻿// ------------------------------------------------------------------------------------------------
+// Training ~ A training program for new joinees at Metamation, Batch - July 2026.
+// Copyright (c) Trumpf Metamation India.
+// ------------------------------------------------------------------------------------------------
+// Evaluator.cs
+// A09.2: Expression Evaluator
+// Evaluates arithmetic expressions using operator and operand stacks
+// ------------------------------------------------------------------------------------------------
 
 namespace Eval;
 
 class EvalException : Exception {
    public EvalException (string message) : base (message) { }
 }
+
 class Evaluator {
    #region Properties -----------------------------------------------
    public int BasePriority { get; set; }
@@ -25,58 +30,57 @@ class Evaluator {
          tokens.Add (token);
       }
       TVariable? tVariable = null;
-      if (tokens.Count > 2 && tokens[0] is TVariable tvar && tokens[1] is TOpBinary { Op: '=' }) {
-         tVariable = tvar;
-         tokens.RemoveRange (0, 2);
-      }
-      TUnary? tUnary = null;
-      if (tokens.Count > 1 && tokens[0] is TUnary tU && tokens[1] is TUnary { : '+' or '-' }) {
+      if (tokens.Count > 2 && tokens[0] is TVariable tvar && tokens[1] is TOpBinary { Op: "=" }) {
          tVariable = tvar;
          tokens.RemoveRange (0, 2);
       }
       foreach (var t in tokens) Process (t);
-      while (mOperators.Count > 0) ApplyOperator ();
+      while (_operators.Count > 0) ApplyOperator ();
       if (BasePriority != 0) throw new EvalException ("Mismatched parentheses");
-      if (mOperators.Count > 0) throw new EvalException ("Too many operators");
-      if (mOperands.Count > 1) throw new EvalException ("Too many operators");
-      double f = mOperands.Pop ();
-      if (tVariable != null) mVars[tVariable.Name] = f;
-      return f;
+      if (_operators.Count > 0) throw new EvalException ("Too many operators");
+      if (_operands.Count > 1) throw new EvalException ("Too many operands");
+      double result = _operands.Pop ();
+      if (tVariable != null) _vars[tVariable.Name] = result;
+      return result;
    }
 
    public double GetVariable (string name) {
-      if (mVars.TryGetValue (name, out double value)) return value;
+      if (_vars.TryGetValue (name, out double value)) return value;
       throw new EvalException ($"Unknown variable: {name}");
    }
    #endregion
 
    #region Implementations ------------------------------------------
    void ApplyOperator () {
-      var op = mOperators.Pop ();
-      var f1 = mOperands.Pop ();
-      if (op is TOpFunction func) {
-         if (mOperands.Count < 1) throw new EvalException ("Too few operators");
-         mOperands.Push (func.Apply (f1));
+      var op = _operators.Pop ();
+      if (_operands.Count < 1) throw new EvalException ("Too few operators");
+      var r = _operands.Pop ();
+      if (op is TUnary unary) {
+         _operands.Push (unary.Apply (r));
+      } else if (op is TOpFunction func) {
+         _operands.Push (func.Apply (r));
       } else if (op is TOpBinary bin) {
-         if (mOperands.Count < 1) throw new EvalException ("Too few operands");
-         var f2 = mOperands.Pop ();
-         mOperands.Push (bin.Apply (f2, f1));
+         if (_operands.Count < 1) throw new EvalException ("Too few operands");
+         var l = _operands.Pop ();
+         _operands.Push (bin.Apply (l, r));
       }
    }
+
    bool OkToPush (TOperator op) {
-      if (mOperators.Count == 0) return true;
-      var top = mOperators.Peek ();
+      if (_operators.Count == 0) return true;
+      var top = _operators.Peek ();
       return op.FinalPriority > top.FinalPriority;
    }
+
    void Process (Token token) {
       switch (token) {
          case TNumber num:
-            mOperands.Push (num.Value);
+            _operands.Push (num.Value);
             break;
          case TOperator op:
             op.FinalPriority = op.Priority + BasePriority;
             while (!OkToPush (op)) ApplyOperator ();
-            mOperators.Push (op);
+            _operators.Push (op);
             break;
          case TPunctuation p:
             BasePriority += p.Punct == '(' ? 10 : -10;
@@ -84,16 +88,17 @@ class Evaluator {
          default: throw new EvalException ($"Unexpected token: {token}");
       }
    }
+
    void Reset () {
-      mOperators.Clear ();
-      mOperands.Clear ();
+      _operators.Clear ();
+      _operands.Clear ();
       BasePriority = 0;
    }
    #endregion
 
    #region Private --------------------------------------------------
-   readonly Stack<double> mOperands = [];
-   readonly Stack<TOperator> mOperators = [];
-   readonly Dictionary<string, double> mVars = [];
+   readonly Stack<double> _operands = [];
+   readonly Stack<TOperator> _operators = [];
+   readonly Dictionary<string, double> _vars = [];
    #endregion
 }
