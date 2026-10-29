@@ -45,6 +45,8 @@ class Program {
    }
 
    #region Implementations ------------------------------------------------------------------------
+   // Method to parse the file name into its components
+   // See file://C:\Work\Training26\Data\StateTransitionDiagram.png
    static (string drive, string directory, string filename, string extension) FileParse
       (string input) {
       State s = A;
@@ -71,7 +73,7 @@ class Program {
          toDo ();
       }
       if (s == H && isDirectoryNotEmpty) return (drive, directory, fileName, extension);
-      return ("", "", "", "");
+      return ("-", "-", "-", "-");
    }
    #endregion
 }
