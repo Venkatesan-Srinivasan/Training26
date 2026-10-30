@@ -61,7 +61,7 @@ class Program {
             (C, '\\') => (D, none),
             (D or E, >= 'A' and <= 'Z') => (E, () => fileName += ch),
             (E, '\\') => (D, () => {
-               directory += directory.Length > 0 ? "-" + fileName : fileName;
+               directory += directory.Length > 0 ? "/" + fileName : fileName;
                isDirectoryNotEmpty = true; fileName = "";
             }
             ),
