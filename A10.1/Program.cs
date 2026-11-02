@@ -37,11 +37,18 @@ class Program {
          @"Z:\Documents\PRACTICE.TXT",
          @"N:\DOWNLOADS\CACHE.jpg"
       };
+      Console.ForegroundColor = ConsoleColor.Green;
+      Console.WriteLine ("----------------------------------------------------------------------");
+      Console.WriteLine ($"| {"Drive",-6}|{" ",14}{"Directory",-23}| {"FileName",-9}| {"Extension",-9} |");
+      Console.ResetColor ();
       foreach (var item in fileNames) {
+         Console.ForegroundColor = ConsoleColor.DarkGreen;
          (string drive, string directory, string fileName, string extension) = FileParse (item);
-         Console.WriteLine ($"[ Drive: {drive}, Directory: {directory}," +
-            $" Filename: {fileName}, Extension: {extension} ]");
+         Console.WriteLine ("----------------------------------------------------------------------");
+         Console.WriteLine ($"|{" ",3}{drive,-4}| {directory,-36}| {fileName,-9}| {extension,-10}|");
       }
+      Console.WriteLine ("----------------------------------------------------------------------");
+      Console.ResetColor ();
    }
 
    #region Implementations ------------------------------------------------------------------------
@@ -52,7 +59,6 @@ class Program {
       State s = A;
       Action toDo;
       Action none = () => { };
-      bool isDirectoryNotEmpty = false;
       string drive = "", directory = "", fileName = "", extension = "";
       foreach (char ch in input.Trim () + "~") {
          (s, toDo) = (s, ch) switch {
@@ -61,18 +67,17 @@ class Program {
             (C, '\\') => (D, none),
             (D or E, >= 'A' and <= 'Z') => (E, () => fileName += ch),
             (E, '\\') => (D, () => {
-               directory += directory.Length > 0 ? "/" + fileName : fileName;
-               isDirectoryNotEmpty = true; fileName = "";
+               directory += directory.Length > 0 ? "/" + fileName : fileName; fileName = "";
             }
             ),
-            (E, '.') => (F, none),
+            (E, '.') => ((directory.Length > 0 ? F : D), none),
             (F or G, >= 'A' and <= 'Z') => (G, () => extension += ch),
             (G, '~') => (H, none),
             _ => (Z, none)
          };
          toDo ();
       }
-      if (s == H && isDirectoryNotEmpty) return (drive, directory, fileName, extension);
+      if (s == H) return (drive, directory, fileName, extension);
       return ("-", "-", "-", "-");
    }
    #endregion
