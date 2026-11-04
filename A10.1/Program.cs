@@ -59,25 +59,24 @@ class Program {
       State s = A;
       Action toDo;
       Action none = () => { };
-      string drive = "", directory = "", fileName = "", extension = "";
+      string drive = "", directory = "", fileName = "", extension = "", temp = "";
       foreach (char ch in input.Trim () + "~") {
          (s, toDo) = (s, ch) switch {
             (A, >= 'A' and <= 'Z') => (B, () => drive = $"{ch}"),
             (B, ':') => (C, none),
             (C, '\\') => (D, none),
-            (D or E, >= 'A' and <= 'Z') => (E, () => fileName += ch),
-            (E, '\\') => (D, () => {
-               directory += directory.Length > 0 ? "/" + fileName : fileName; fileName = "";
-            }
-            ),
-            (E, '.') => ((directory.Length > 0 ? F : D), none),
-            (F or G, >= 'A' and <= 'Z') => (G, () => extension += ch),
-            (G, '~') => (H, none),
+            (D or E, >= 'A' and <= 'Z') => (E, () => temp += ch),
+            (E, '\\') => (F, () => { directory = temp; temp = ""; }),
+            (F or G, >= 'A' and <= 'Z') => (G, () => temp += ch),
+            (G, '\\') => (F, () => { directory += '\\' + temp; temp = ""; }),
+            (G, '.') => (H, () => fileName = temp),
+            (H or I, >= 'A' and <= 'Z') => (I, () => extension += ch),
+            (I, '~') => (J, none),
             _ => (Z, none)
          };
          toDo ();
       }
-      if (s == H) return (drive, directory, fileName, extension);
+      if (s == J) return (drive, directory, fileName, extension);
       return ("-", "-", "-", "-");
    }
    #endregion
@@ -85,5 +84,5 @@ class Program {
 #endregion
 
 #region enum State --------------------------------------------------------------------------------
-enum State { A, B, C, D, E, F, G, H, Z }
+enum State { A, B, C, D, E, F, G, H, I, J, Z }
 #endregion
