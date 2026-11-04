@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------------------------------
 // TDeque.cs
 // A10.2: Implement a TDeque<T>
-// Program to impleent enqueue or dequeue at both the ends at the head and the tail.
+// Program to implement enqueue or dequeue at both the ends at the head and the tail.
 // This should allow to add and remove at the head & add and remove at the tail.
 // Implement it using an array of T.
 // ------------------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ public class TDeque<T> {
    #region Methods --------------------------------------------------
    /// <summary>Remove the first item</summary>
    public T DequeueFront () {
-      if (IsEmpty) throw new Exception ("Queue empty");
+      if (IsEmpty) throw new Exception ("Deque empty");
       T value = mData[mHead];
       mData[mHead] = default!;
       mHead = (mHead + 1) % mData.Length;
@@ -37,7 +37,7 @@ public class TDeque<T> {
 
    /// <summary>Remove the last item</summary>
    public T DequeueRear () {
-      if (IsEmpty) throw new Exception ("Queue empty");
+      if (IsEmpty) throw new Exception ("Deque empty");
       mTail = (mTail - 1 + mData.Length) % mData.Length;
       T value = mData[mTail];
       mData[mTail] = default!;
@@ -63,14 +63,14 @@ public class TDeque<T> {
 
    /// <summary>Get the first item added to deque</summary>
    public T PeekFront () {
-      if (IsEmpty) throw new Exception ("Queue os empty");
+      if (IsEmpty) throw new Exception ("Deque is empty");
       T value = DequeueFront ();
       EnqueueFront (value);
       return value;
    }
    /// <summary>Get the last item added to deque</summary>
    public T PeekRear () {
-      if (IsEmpty) throw new Exception ("Queue os empty");
+      if (IsEmpty) throw new Exception ("Deque is empty");
       T value = DequeueRear ();
       EnqueueRear (value);
       return value;
